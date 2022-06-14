@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from "react"
 import { Film, People } from "../../models";
 import { StyledArrowBackIcon, H2, AttributeLabelC1, AttributeLabelC2, AttributeValueC1, AttributeValueC2, StyledButton, GridContainer, MainContent, MoviesContainer, SpeciesContainer, StarshipsContainer, VehiclesContainer, Header, Footer } from "./Card.styles";
 import { useFetchPlanet } from "../../api/hooks";
-import { dateFormat, getFullYear } from "../../common/dateUtils";
+import { dateFormat, getFullYear } from "../../common/stringUtils/dateFormat";
 import { CardContainerList } from "./CardContainerList";
-import { apiRoutes } from '../../api/apiRoutes';
+import { apiRoutes } from "../../api/apiRoutes";
 
 export interface CardProps {
   person: People;
@@ -14,12 +14,21 @@ export interface CardProps {
 }
 
 export function Card({ header, person, close, movieData }: CardProps) {
-  const planetId = parseInt(person.homeworld.split("/planets/")[1].replace("/", ""));
+  const planetId = getIdFromUrl(person.homeworld);
   const { planet } = useFetchPlanet({ id: planetId });
   const [homeworld, setHomeworld] = useState<string>("");
-  const [species, setSpecies] = useState<string>("");
-  const [starships, setStarships] = useState<string>("");
-  const [vehicles, setVehicles] = useState<string>("");
+  const [species, setSpecies] = useState<string[]>([""]);
+  const [starships, setStarships] = useState<string[]>([""]);
+  const [vehicles, setVehicles] = useState<string[]>([""]);
+
+  // returns the ID number from url, expecting the URL looks like 
+  function getIdFromUrl(url:string):number {
+    const splittedCharacters = url.split("/");
+    if (splittedCharacters[splittedCharacters.length - 1].length > 0){
+      return parseInt(splittedCharacters[splittedCharacters.length - 1]);
+    }
+    return parseInt(splittedCharacters[splittedCharacters.length-2]);
+  }
 
   // get all movie appearences for the character 
   function moviesWithYear() {
@@ -28,29 +37,25 @@ export function Card({ header, person, close, movieData }: CardProps) {
     return movies;
   }
 
-  // fetch all species for the charater
-  function getSpecies() {
+  useEffect(() => {
+    // fetch all species for the charater
     Promise.all(
       person.species.map((url) => {
-        const id = parseInt(url.split("/species/")[1].replace("/", ""));
+        const id = getIdFromUrl(url);
         return fetch(apiRoutes.species + id)
           .then(res => res.json())
-      }
-      )
+      })
     ).then((data) => {
       const speciesNames = data.map((species) => {
         return species["name"];
       });
-      setSpecies(speciesNames.join("|"));
+      setSpecies(speciesNames);
     });
-  }
 
-  // fetch all starships for the charater
-  function getStarships() {
-    //starships
+    // fetch all starships for the charater
     Promise.all(
       person.starships.map((url) => {
-        const id = parseInt(url.split("/starships/")[1].replace("/", ""));
+        const id = getIdFromUrl(url);
         return fetch(apiRoutes.starships + id)
           .then(res => res.json())
       })
@@ -58,16 +63,13 @@ export function Card({ header, person, close, movieData }: CardProps) {
       const starshipNames = data.map((starship) => {
         return starship["name"];
       });
-      setStarships(starshipNames.join("|"));
-    });
-  }
+      setStarships(starshipNames);
+    });   
 
-  // fetch all vehicles for the charater
-  function getVehicles() {
-    //vehicles
+    // fetch all vehicles for the charater
     Promise.all(
       person.vehicles.map((url) => {
-        const id = parseInt(url.split("/vehicles/")[1].replace("/", ""));
+        const id = getIdFromUrl(url);
         return fetch(apiRoutes.vehicles + id)
           .then(res => res.json())
       })
@@ -75,16 +77,13 @@ export function Card({ header, person, close, movieData }: CardProps) {
       const vehicleNames = data.map((vehicle) => {
         return vehicle["name"];
       });
-      setVehicles(vehicleNames.join("|"));
+      setVehicles(vehicleNames);
     });
-  }
+  },[person]);
 
   useEffect(() => {
     setHomeworld(planet?.name ?? "");
-    getSpecies();
-    getStarships();
-    getVehicles();
-  }, [person, planet, getSpecies, getStarships, getVehicles]);
+  }, [planet]);
 
   return (
     <GridContainer>
