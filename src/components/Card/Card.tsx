@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from "react";
 import { Film, People } from "../../models";
 import { StyledArrowBackIcon, H2, AttributeLabelC1, AttributeLabelC2, AttributeValueC1, AttributeValueC2, StyledButton, GridContainer, MainContent, MoviesContainer, SpeciesContainer, StarshipsContainer, VehiclesContainer, Header, Footer } from "./Card.styles";
 import { useFetchPlanet } from "../../api/hooks";
-import { dateFormat, getFullYear } from "../../common/stringUtils/dateFormat";
+import { dateFormat, getFullYear } from "../../common/dateUtils";
 import { CardContainerList } from "./CardContainerList";
 import { apiRoutes } from '../../api/apiRoutes';
 

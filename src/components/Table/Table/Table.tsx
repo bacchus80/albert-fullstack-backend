@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from "react";
 import { ColumnData, People } from "../../../models";
 import { TableBody } from "../TableBody";
 import { TableHead } from "../TableHead";
